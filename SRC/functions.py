@@ -1,4 +1,5 @@
 import argparse
+from clean import df_ff, df_ff_state_pop_income
 
 
 def get_args(argv=None):
@@ -7,7 +8,6 @@ def get_args(argv=None):
 
     parser = argparse.ArgumentParser(
         description="Get USA state and fast food company name")
-    # parser.add_argument("-x", "--xxx", type=str,)
     parser.add_argument("--state", "-s", type=str,
                         choices=valid_states, help="USA State name")
     parser.add_argument("--fastfoodcompany", "-f", type=str,
@@ -15,65 +15,33 @@ def get_args(argv=None):
     return parser.parse_args(argv)
 
 
-def state_fixer(text):
-    ''' fixes the column 'state' by including the state name
-    instead of its abbreviation'''
-    states = {
-        'AK': 'Alaska',
-        'AL': 'Alabama',
-        'AR': 'Arkansas',
-        'AS': 'American Samoa',
-        'AZ': 'Arizona',
-        'CA': 'California',
-        'CO': 'Colorado',
-        'CT': 'Connecticut',
-        'DC': 'District of Columbia',
-        'DE': 'Delaware',
-        'FL': 'Florida',
-        'GA': 'Georgia',
-        'GU': 'Guam',
-        'HI': 'Hawaii',
-        'IA': 'Iowa',
-        'ID': 'Idaho',
-        'IL': 'Illinois',
-        'IN': 'Indiana',
-        'KS': 'Kansas',
-        'KY': 'Kentucky',
-        'LA': 'Louisiana',
-        'MA': 'Massachusetts',
-        'MD': 'Maryland',
-        'ME': 'Maine',
-        'MI': 'Michigan',
-        'MN': 'Minnesota',
-        'MO': 'Missouri',
-        'MP': 'Northern Mariana Islands',
-        'MS': 'Mississippi',
-        'MT': 'Montana',
-        'NA': 'National',
-        'NC': 'North Carolina',
-        'ND': 'North Dakota',
-        'NE': 'Nebraska',
-        'NH': 'New Hampshire',
-        'NJ': 'New Jersey',
-        'NM': 'New Mexico',
-        'NV': 'Nevada',
-        'NY': 'New York',
-        'OH': 'Ohio',
-        'OK': 'Oklahoma',
-        'OR': 'Oregon',
-        'PA': 'Pennsylvania',
-        'PR': 'Puerto Rico',
-        'RI': 'Rhode Island',
-        'SC': 'South Carolina',
-        'SD': 'South Dakota',
-        'TN': 'Tennessee',
-        'TX': 'Texas',
-        'UT': 'Utah',
-        'VA': 'Virginia',
-        'VI': 'Virgin Islands',
-        'VT': 'Vermont',
-        'WA': 'Washington',
-        'WI': 'Wisconsin',
-        'WV': 'West Virginia',
-        'WY': 'Wyoming'}
-    return states[text]
+def avg_income(state):
+    return "Average household income in {} -> ${}".format(state, int(df_ff_state_pop_income[df_ff_state_pop_income.state == state]['avg_income']))
+
+
+def ranking_avg_income(state):
+    df_state_income = df_ff_state_pop_income.sort_values(
+        by=['avg_income'], ascending=False).reset_index(drop=True)
+    return "{} is the state nº {} in average income".format(state, df_state_income[df_state_income.state == state].index[0] + 1)
+
+
+def ranking_ff_rest(state):
+    df_state_ff_rest = df_ff_state_pop_income.sort_values(
+        by=['ffrest_percapita'], ascending=False).reset_index(drop=True)
+    return "{} is the state nº {} in number of fast food restaurants per capita(10K)".format(state, df_state_ff_rest[df_state_ff_rest.state == state].index[0] + 1)
+
+
+def ranking_ff_company(state, fastfoodcompany):
+    df_state_ff_company = df_ff[df_ff.name == fastfoodcompany].groupby(
+        ['state'], as_index=False).count()
+    df_state_ff_company.sort_values(
+        by=['name'], ascending=False).reset_index(drop=True)
+    ranking = df_state_ff_company[df_state_ff_company.state ==
+                                  state].index[0] + 1
+    num = len(df_ff[(df_ff.name == fastfoodcompany)
+                    & (df_ff.state == state)].index)
+    return "{} is the state nº {} in number of {}s with {} restaurants".format(state, ranking, fastfoodcompany, num)
+
+
+def report_generator(state, fastfoodcompany):
+    return "{}\n{}\n{}\n{}".format(ranking_avg_income(state), ranking_ff_rest(state), ranking_ff_company(state, fastfoodcompany), avg_income(state))

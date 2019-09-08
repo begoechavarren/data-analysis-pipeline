@@ -1,6 +1,6 @@
 import pandas as pd
 from acquisition import df_ff, df_ff_percapita, df_income, df_pop
-from functions import state_fixer
+from functions_clean import state_fixer
 
 # ***********************CSV fast food***********************
 
