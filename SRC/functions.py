@@ -1,14 +1,17 @@
+import email
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.mime.base import MIMEBase
+from email import encoders
+import ssl
 import argparse
 from clean import df_ff, df_ff_state_pop_income
 from analysis import state_conclusion
 import seaborn as sns
 from fpdf import FPDF
 import smtplib
-from os.path import basename
-from email.mime.application import MIMEApplication
-from email.mime.multipart import MIMEMultipart
-from email.mime.text import MIMEText
-from email.utils import COMMASPACE, formatdate
+import os
+gmail_password = os.getenv("gmail_password")
 
 
 def get_args(argv=None):
@@ -19,9 +22,9 @@ def get_args(argv=None):
     parser = argparse.ArgumentParser(
         description="Get USA state and fast food company name")
     parser.add_argument("--state", "-s", type=str,
-                        choices=valid_states, help="USA State name")
+                        choices=valid_states, help="USA State name", required=True)
     parser.add_argument("--fastfoodtype", "-f", type=str, choices=valid_foodtypes,
-                        help="fast food type")
+                        help="fast food type", required=True)
     return parser.parse_args(argv)
 
 
@@ -47,7 +50,6 @@ def ranking_ff_type(state, fastfoodtype):
     if len(df_state_ff_type[df_state_ff_type.state == state]) > 0:
         ranking = df_state_ff_type[df_state_ff_type.state ==
                                    state].index[0] + 1
-        # mejorar esto!!!!!!!!!!!!!!!
         if ranking > 3:
             ranking = "{}th ".format(ranking)
         if ranking == 1:
@@ -64,8 +66,8 @@ def report_generator(state, fastfoodtype):
     return "- {}\n- {}\n{}\n- {}\n".format(ranking_avg_income(state), ranking_ff_rest(state), state_conclusion, ranking_ff_type(state, fastfoodtype))
 
 
-def plot_generator(state, df=df_ff_state_pop_income):
-    plot_df = df
+def plot_generator(state, fastfoodtype):
+    plot_df = df_ff_state_pop_income
     plot_df['USA_states'] = plot_df['state'].apply(
         lambda text: state if text == state else "Rest of States")
     plot = sns.lmplot(x="avg_income", y="ffrest_percapita", hue="USA_states", legend="full", fit_reg=False,
@@ -106,12 +108,52 @@ def pdf_generator(state, fastfoodtype):
     pdf.multi_cell(effective_page_width, 0.15, my_text)
     pdf.ln(0.30)
 
+    plot_generator(state, fastfoodtype)
     pdf.image("output.png", w=pdf.w/2.0, h=pdf.h/4.0)
     pdf.ln(0.10)
 
     pdf.set_font("helvetica", 'I', size=8)
-    pdf.multi_cell(effective_page_width, 0.15,
-                   "Figure 1: Relationship between the number of fast food companies and average household income in California. Source: own elaboration from United States Census Bureau and Datafiniti")
+    pdf.multi_cell(effective_page_width, 0.15, "Figure 1: Relationship between the number of fast food companies and average household income in {}. Source: own elaboration from United States Census Bureau and Datafiniti".format(state))
     pdf.ln(0.25)
 
-    pdf.output('my_pdf.pdf', 'F')
+    pdf.output('report.pdf', 'F')
+
+
+def email_generator(state, fastfoodtype):
+    subject = "An email with attachment from Python"
+    body = "This is an email with attachment sent from Python"
+    sender_email = "bego.ironhack@gmail.com"
+    receiver_email = input("Enter your email address to send you the report: ")
+    password = gmail_password
+    # Create a multipart message and set headers
+    message = MIMEMultipart()
+    message["From"] = sender_email
+    message["To"] = receiver_email
+    message["Subject"] = subject
+    message["Bcc"] = receiver_email  # Recommended for mass emails
+    # Add body to email
+    message.attach(MIMEText(body, "plain"))
+    pdf_generator(state, fastfoodtype)
+    filename = "report.pdf"  # In same directory as script
+    # Open PDF file in binary mode
+    with open(filename, "rb") as attachment:
+        # Add file as application/octet-stream
+        # Email client can usually download this automatically as attachment
+        part = MIMEBase("application", "octet-stream")
+        part.set_payload(attachment.read())
+    # Encode file in ASCII characters to send by email
+    encoders.encode_base64(part)
+    # Add header as key/value pair to attachment part
+    part.add_header(
+        "Content-Disposition",
+        f"attachment; filename= {filename}",
+    )
+    # Add attachment to message and convert message to string
+    message.attach(part)
+    text = message.as_string()
+    # Log in to server using secure context and send email
+    context = ssl.create_default_context()
+    with smtplib.SMTP_SSL("smtp.gmail.com", 465, context=context) as server:
+        server.login(sender_email, password)
+        server.sendmail(sender_email, receiver_email, text)
+    return print("Email sent to {}".format(receiver_email))

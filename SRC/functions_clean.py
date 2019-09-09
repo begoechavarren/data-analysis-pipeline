@@ -66,29 +66,10 @@ def state_fixer(text):
 
 
 def category_fixer(text):
-    if re.search('[Mm]exican|[Tt]aco', text):
-        return 'mexican'
-    if re.search('[Ss]andwich', text):
-        return 'sandwich'
-    if re.search('[Pp]izza|[Ii]talian', text):
-        return 'italian'
-    if re.search('[Cc]hicken', text):
-        return 'chicken'
-    if re.search('[Ff]ish', text):
-        return 'fish'
-    if re.search('[Aa]sian|[Ss]ushi', text):
-        return 'asian'
-    if re.search('[Bb]urger', text):
-        return 'burger'
-    if re.search('[Ii]ce [Cc]ream', text):
-        return 'ice cream'
-    if re.search('[Mm]editerranean', text):
-        return 'mediterranean'
-    if re.search('[Bb]akery|[Bb]reakfast', text):
-        return 'bakery'
-    if re.search('[Mm]iddle [Ee]ast', text):
-        return 'middle east'
-    if re.search('[Hh]ot [Dd]og', text):
-        return 'hot dog'
-    if re.search('[Ff]ast [Ff]ood|[Aa]merican', text):
-        return 'american fast food'
+    ''' fixes the column 'category' by further grouping in 
+    a few categories'''
+    categories = {'[Mm]exican|[Tt]aco': 'mexican', '[Ss]andwich': 'sandwich', '[Pp]izza|[Ii]talian': 'italian', '[Cc]hicken': 'chicken', '[Ff]ish': 'fish', '[Aa]sian|[Ss]ushi': 'asian', '[Bb]urger': 'burger',
+                  '[Ii]ce [Cc]ream': 'ice cream', '[Mm]editerranean': 'mediterranean', '[Bb]akery|[Bb]reakfast': 'bakery', '[Mm]iddle [Ee]ast': 'middle east', '[Hh]ot [Dd]og': 'hot dog', '[Ff]ast [Ff]ood|[Aa]merican': 'american fast food'}
+    for cat in categories:
+        if re.search(cat, text):
+            return categories[cat]
