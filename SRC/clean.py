@@ -40,6 +40,9 @@ df_ff.columns = ['id', 'categories', 'city', 'name', 'postalcode', 'state']
 # Fixing state column
 df_ff['state'] = df_ff['state'].apply(state_fixer)
 
+df_ff.to_csv('../output/fast_food.csv')
+
+
 # ***********************API INCOME***********************
 
 df_income.columns = df_income.iloc[0]
@@ -78,3 +81,5 @@ df_ff_state_pop_income = df_ff_state_pop_income.drop(
     'ffrest_percapita', axis=1)
 df_ff_state_pop_income = pd.merge(
     df_ff_state_pop_income, df_ff_percapita, on='state')
+
+df_ff_state_pop_income.to_csv('../output/population_income.csv')
