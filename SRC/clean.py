@@ -1,6 +1,7 @@
 import pandas as pd
 from acquisition import df_ff, df_ff_percapita, df_income, df_pop
-from functions_clean import state_fixer
+from functions_clean import state_fixer, category_fixer
+pd.options.mode.chained_assignment = None
 
 # ***********************CSV fast food***********************
 
@@ -22,15 +23,15 @@ from functions_clean import state_fixer
 df_ff = df_ff.drop_duplicates(subset=['id', 'address'])
 # df_ff.shape
 
-# Finding if this columns is interesting for my purpose
-# print(df_ff.groupby('categories').count()['id'])
+# Fixing column
+df_ff['categories'] = df_ff['categories'].apply(category_fixer)
 
 # Deleting not useful columns
-df_ff = df_ff.drop(['dateAdded', 'country', 'dateUpdated', 'address', 'categories',
+df_ff = df_ff.drop(['dateAdded', 'country', 'dateUpdated', 'address',
                     'keys', 'latitude', 'longitude', 'sourceURLs', 'websites'], axis=1)
 
 # Renaming columns
-df_ff.columns = ['id', 'city', 'name', 'postalcode', 'state']
+df_ff.columns = ['id', 'categories', 'city', 'name', 'postalcode', 'state']
 
 # Check missing values - there is no null values
 ##null_cols = df_ff.isnull().sum()
@@ -72,7 +73,7 @@ df_ff_state_pop_income['ffrest_percapita'] = (
     df_ff_state_pop_income['num_ffrest'] / df_ff_state_pop_income['population'])*10000
 df_ff_state_pop_income = df_ff_state_pop_income.drop('num_ffrest', axis=1)
 
-# replace column
+# Replace column
 df_ff_state_pop_income = df_ff_state_pop_income.drop(
     'ffrest_percapita', axis=1)
 df_ff_state_pop_income = pd.merge(

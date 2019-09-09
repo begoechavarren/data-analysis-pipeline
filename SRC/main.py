@@ -1,10 +1,11 @@
-from functions import get_args, report_generator
+from functions import get_args, report_generator, plot_generator
 
 
 def main():
     args = get_args()
-    report = report_generator(args.state, args.fastfoodcompany)
-    return report
+    report = report_generator(args.state, args.fastfoodtype)
+    plot = plot_generator(args.state)
+    return report, plot
 
 
 print(main())
