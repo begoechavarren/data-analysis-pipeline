@@ -1,11 +1,10 @@
-from functions import get_args, report_generator, plot_generator
+from functions import get_args, pdf_generator
 
 
 def main():
     args = get_args()
-    report = report_generator(args.state, args.fastfoodtype)
-    plot = plot_generator(args.state)
-    return report, plot
+    pdf_generator(args.state, args.fastfoodtype)
+    return "A pdf file has been generated with your report"
 
 
 print(main())

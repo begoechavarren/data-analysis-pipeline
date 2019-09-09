@@ -2,7 +2,13 @@ import argparse
 from clean import df_ff, df_ff_state_pop_income
 from analysis import state_conclusion
 import seaborn as sns
-sns.set(color_codes=True)
+from fpdf import FPDF
+import smtplib
+from os.path import basename
+from email.mime.application import MIMEApplication
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.utils import COMMASPACE, formatdate
 
 
 def get_args(argv=None):
@@ -19,20 +25,18 @@ def get_args(argv=None):
     return parser.parse_args(argv)
 
 
-def avg_income(state):
-    return "Average household income in {} -> ${}".format(state, int(df_ff_state_pop_income[df_ff_state_pop_income.state == state]['avg_income']))
-
-
 def ranking_avg_income(state):
     df_state_income = df_ff_state_pop_income.sort_values(
         by=['avg_income'], ascending=False).reset_index(drop=True)
-    return "{} is the state nº {} in average income".format(state, df_state_income[df_state_income.state == state].index[0] + 1)
+    average_income = int(
+        df_ff_state_pop_income[df_ff_state_pop_income.state == state]['avg_income'])
+    return "{} is the state nº {} in average income (${})".format(state, df_state_income[df_state_income.state == state].index[0] + 1, average_income)
 
 
 def ranking_ff_rest(state):
     df_state_ff_rest = df_ff_state_pop_income.sort_values(
         by=['ffrest_percapita'], ascending=False).reset_index(drop=True)
-    return "{} is the state nº {} in number of fast food restaurants per capita(10K)".format(state, df_state_ff_rest[df_state_ff_rest.state == state].index[0] + 1)
+    return "{} is the state nº {} in number of fast food restaurants per capita (per 10K citizens)".format(state, df_state_ff_rest[df_state_ff_rest.state == state].index[0] + 1)
 
 
 def ranking_ff_type(state, fastfoodtype):
@@ -57,14 +61,57 @@ def ranking_ff_type(state, fastfoodtype):
 
 
 def report_generator(state, fastfoodtype):
-    return "{}\n{}\n{}\n{}\n{}".format(ranking_avg_income(state), ranking_ff_rest(state), state_conclusion, ranking_ff_type(state, fastfoodtype), avg_income(state))
+    return "- {}\n- {}\n{}\n- {}\n".format(ranking_avg_income(state), ranking_ff_rest(state), state_conclusion, ranking_ff_type(state, fastfoodtype))
 
 
 def plot_generator(state, df=df_ff_state_pop_income):
-    df['my_state'] = df['state'].apply(
+    plot_df = df
+    plot_df['USA_states'] = plot_df['state'].apply(
         lambda text: state if text == state else "Rest of States")
-    plot = sns.lmplot(x="avg_income", y="ffrest_percapita", hue="my_state", legend="full", fit_reg=False,
-                      data=df, palette="Paired")
+    plot = sns.lmplot(x="avg_income", y="ffrest_percapita", hue="USA_states", legend="full", fit_reg=False,
+                      data=plot_df, palette="Paired")
     sns.regplot(x="avg_income", y="ffrest_percapita",
-                data=df, scatter=False, ax=plot.axes[0, 0])
-    return plot.set_axis_labels("Avg household income ($)", "# fast food restaurants (per 10K people)")
+                data=plot_df, scatter=False, ax=plot.axes[0, 0])
+    final_plot = plot.set_axis_labels(
+        "Avg household income ($)", "# fast food restaurants (per 10K citizens)")
+    final_plot.savefig("output.png")
+    return final_plot
+
+
+def pdf_generator(state, fastfoodtype):
+    pdf = FPDF(format='letter', unit='in')
+    pdf.l_margin = pdf.l_margin*4.0
+    pdf.r_margin = pdf.r_margin*4.0
+    pdf.t_margin = pdf.t_margin*4.0
+    pdf.b_margin = pdf.b_margin*4.0
+    pdf.add_page()
+
+    effective_page_width = pdf.w - 2*pdf.l_margin
+
+    epw = pdf.w - pdf.l_margin - pdf.r_margin
+    eph = pdf.h - pdf.t_margin - pdf.b_margin
+
+    pdf.set_font("helvetica", size=15)
+    pdf.multi_cell(effective_page_width, 0.25,
+                   'Relationship between the number of fast food companies and average household income')
+    pdf.ln(0.30)
+
+    my_text = report_generator(state, fastfoodtype)
+
+    pdf.set_font('helvetica', 'B', 10.0)
+    pdf.cell(1.0, 0.15, '{} analysis:'.format(state))
+    pdf.ln(0.30)
+
+    pdf.set_font('helvetica', '', 10.0)
+    pdf.multi_cell(effective_page_width, 0.15, my_text)
+    pdf.ln(0.30)
+
+    pdf.image("output.png", w=pdf.w/2.0, h=pdf.h/4.0)
+    pdf.ln(0.10)
+
+    pdf.set_font("helvetica", 'I', size=8)
+    pdf.multi_cell(effective_page_width, 0.15,
+                   "Figure 1: Relationship between the number of fast food companies and average household income in California. Source: own elaboration from United States Census Bureau and Datafiniti")
+    pdf.ln(0.25)
+
+    pdf.output('my_pdf.pdf', 'F')
