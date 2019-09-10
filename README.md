@@ -25,8 +25,8 @@ I also used argparse so that the user provides two arguments (the state and a ca
 Phase where I obtained and prepared the data to be analysed later. 
 
 1. First step was to acquire the data from the dataset CSV and the APIs in the **acquisition.py** file
-2. Clean the data in the clean.py file with the help of the functions in **functions_clean.py**
-3. I analysed the clean data in the analysis.py file to obtain general conclusions: there is in fact a strong negative correlation between the variables
+2. Clean the data in the **clean.py** file with the help of the functions in **functions_clean.py**
+3. I analysed the clean data in the **analysis.py** file to obtain general conclusions: there is in fact a strong negative correlation between the variables
 
 
 ### 2 - Analysis report generation, and pdf email attachment based on arguments
@@ -43,7 +43,7 @@ Phase where I analysed the data based on the arguments received in **main.py** t
 ## Important notes
 
 To execute the program the user needs to introduce the following two arguments:
-- USA State as: --state or -s
+- USA state as: --state or -s
 - Category of fast food company as: --fastfoodtype or -f
 
 
@@ -57,7 +57,7 @@ The accepted categories for the USA state are the following:
 ['Alabama', 'Alaska', 'Arizona', 'Arkansas', 'California', 'Colorado', 'Connecticut', 'Delaware', 'District of Columbia', 'Florida', 'Georgia', 'Hawaii', 'Idaho', 'Illinois', 'Indiana', 'Iowa', 'Kansas', 'Kentucky', 'Louisiana', 'Maine', 'Maryland', 'Massachusetts', 'Michigan', 'Minnesota', 'Mississippi', 'Missouri', 'Montana', 'Nebraska', 'Nevada', 'New Hampshire', 'New Jersey', 'New Mexico', 'New York', 'North Carolina', 'North Dakota', 'Northern Mariana Islands', 'Ohio', 'Oklahoma', 'Oregon', 'Palau', 'Pennsylvania', 'Puerto Rico', 'Rhode Island', 'South Carolina', 'South Dakota', 'Tennessee', 'Texas', 'Utah', 'Vermont', 'Virgin Islands', 'Virginia', 'Washington', 'West Virginia', 'Wisconsin', 'Wyoming']
 ```
 
-And this are the accepted categories for the fast food companies:
+And these are the accepted categories for the fast food companies:
 ```
 ['mexican', 'sandwich', 'italian', 'chicken', 'fish', 'asian', 'burger', 'ice cream', 'mediterranean', 'middle east', 'hot dog', 'american fast food']
 ```
