@@ -8,9 +8,9 @@ Ironhack Madrid Data Bootcamp project nº2
 
 ## Overview
 
-The goal of this project was to start with a messy data set of my choice. I needed to import it and build a data pipeline that processes the data and produces a result. 
+The goal of this project was to start with a messy data set of my choice. I needed to import it and build a data pipeline that processed the data and produced a result. 
 
-I started from this data set from Kaggle [American Fast Food restaurants](https://www.kaggle.com/datafiniti/fast-food-restaurants/downloads/fast-food-restaurants.zip/3) which contained representative data of fast food restaurants across the USA, which I populated with data from the APIs of the United States Census Bureau to obtain the [average household income](https://www.census.gov/data/developers/data-sets/Poverty-Statistics.html) and the [total population](https://www.census.gov/data/developers/data-sets/popest-popproj.htmlacross) per state. My hypothesis was that the number of fast food restaurants per capita (per state) must negatively correlated with the average household income.
+I started from this data set from Kaggle [American Fast Food restaurants](https://www.kaggle.com/datafiniti/fast-food-restaurants/downloads/fast-food-restaurants.zip/3) which contained representative data of fast food restaurants across the USA, which I populated with data from the APIs of the United States Census Bureau to obtain the [average household income](https://www.census.gov/data/developers/data-sets/Poverty-Statistics.html) and the [total population](https://www.census.gov/data/developers/data-sets/popest-popproj.htmlacross) per state. My hypothesis was that the number of fast food restaurants per capita (per state) must be negatively correlated with the average household income.
 
 I also used argparse so that the user provides two arguments (the state and a category of fast food restaurants) and the program generates a report based on the arguments in pdf and sends it by email attachment.
 
@@ -22,22 +22,22 @@ I also used argparse so that the user provides two arguments (the state and a ca
 
 ### 1 - Cleaning and analysis
 
-Phase where I obtained and prepare the data to be analysed later. 
+Phase where I obtained and prepared the data to be analysed later. 
 
-1. First step was to acquire the data from the dataset CSV and the APIs in the acquisition.py file
-2. Clean the data in the clean.py file with the help of the functions in functions_clean.py
+1. First step was to acquire the data from the dataset CSV and the APIs in the **acquisition.py** file
+2. Clean the data in the clean.py file with the help of the functions in **functions_clean.py**
 3. I analysed the clean data in the analysis.py file to obtain general conclusions: there is in fact a strong negative correlation between the variables
 
 
 ### 2 - Analysis report generation, and pdf email attachment based on arguments
 
-Phase where I analysed the data based on the arguments received in main.py through argparse and generate a report
+Phase where I analysed the data based on the arguments received in **main.py** through argparse and generate a report
 
-1. In the functions.py file I further analysed the data based on the arguments received and obtained statistics on the average income, fast food restaurants and state population
-2. Generate (based on arguments) in functions.py:
+1. In the **functions.py** file I further analysed the data based on the arguments received and obtained statistics on the average income, fast food restaurants and state population
+2. Generate (based on arguments) in **functions.py**:
     * A Seaborn plot
     * A PDF report including conclusions and plot
-    * An email with the PDF as an attachment sent to the email that the user introduces via input when executing main.py 
+    * An email with the PDF as an attachment sent to the email that the user introduces via input when executing **main.py** 
 
 
 ## Important notes
